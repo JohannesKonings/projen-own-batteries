@@ -4,3 +4,17 @@
 
 For some cases you want to start small "only" with the file generation functionality of projen. This repo is and example how to add your own components to generating files mainly for repo management (eslint, prettier, ...).
 The main target is to have the decisions how the downstream repos will look like baked into this project and use as less parameters as possible.
+
+Three repo type are targeted:
+
+- typescript
+- frontend (react)
+- cdk
+
+## components
+
+Following components are available
+
+### sops
+
+Details [here](./src/components/sops/README.md)
