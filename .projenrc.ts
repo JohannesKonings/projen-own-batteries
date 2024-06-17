@@ -4,7 +4,7 @@ const name = "projen-own-batteries";
 const scope = "@jaykingson";
 const project = new cdk.JsiiProject({
   author: "Johannes Konings",
-  authorAddress: "mail@johanneskonings.dev",
+  authorAddress: "johannes.konings@outlook.com",
   defaultReleaseBranch: "main",
   jsiiVersion: "~5.4.0",
   name,
