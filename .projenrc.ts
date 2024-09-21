@@ -14,9 +14,19 @@ const project = new cdk.JsiiProject({
   repositoryUrl: "git@github.com:JohannesKonings/projen-own-batteries.git",
   packageManager: javascript.NodePackageManager.NPM,
   prettier: true,
-  deps: ["projen"],
+  deps: [
+    "projen",
+    // compontents
+    "aws-cdk-lib",
+    "cdk-nag",
+  ],
   peerDeps: ["projen", "constructs"],
 });
+
+project.eslint?.addIgnorePattern("examples/**/*");
+
+// const tsconfigDevJson = project.tryFindObjectFile("tsconfig.dev.json");
+// tsconfigDevJson?.addToArray("include", "examples/**/*");
 
 // sup projects for quick checks on snyth files
 const folderName = "projectTypesFiles";

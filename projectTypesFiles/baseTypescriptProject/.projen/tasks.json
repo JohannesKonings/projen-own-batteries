@@ -32,6 +32,9 @@
         {
           "exec": "npx projen default",
           "cwd": "../.."
+        },
+        {
+          "exec": "npx tsx .projenrc.ts"
         }
       ]
     },

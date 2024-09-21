@@ -4,5 +4,7 @@ node_modules/
 !/.projen/tasks.json
 !/.projen/deps.json
 !/.projen/files.json
+.env
+!/tsconfig.json
 secrets/sops
 secrets/.env-sops

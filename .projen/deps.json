@@ -110,6 +110,14 @@
       "type": "peer"
     },
     {
+      "name": "aws-cdk-lib",
+      "type": "runtime"
+    },
+    {
+      "name": "cdk-nag",
+      "type": "runtime"
+    },
+    {
       "name": "projen",
       "type": "runtime"
     }
