@@ -5,9 +5,11 @@ node_modules/
 !/.projen/deps.json
 !/.projen/files.json
 .env
+cdk.out
 !/tsconfig.json
 !/cdk.json
 !/lib/aspects/DeletionPolicySetter.ts
 !/lib/constructs/Network.ts
 !/package.json
+cdk.out/
 !/.projenrc.ts

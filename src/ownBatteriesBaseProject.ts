@@ -28,6 +28,7 @@ export class OwnBatteriesBaseProject extends Project {
     new OwnBatteriesProjenrc(this);
 
     this.gitignore.exclude(".env");
+    this.gitignore.exclude("cdk.out");
 
     this.defaultTask?.exec("npx tsx .projenrc.ts");
 
