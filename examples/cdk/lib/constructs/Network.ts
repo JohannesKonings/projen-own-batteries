@@ -1,4 +1,4 @@
-import { SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import { SubnetType, Vpc, NatGatewayProvider } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
 type NetworkProps = {};
@@ -8,11 +8,22 @@ export class Network extends Construct {
     super(scope, id);
 
     this.vpc = new Vpc(this, "Vpc", {
-      maxAzs: 2,
+      maxAzs: 1,
+      natGateways: 1,
       subnetConfiguration: [
         {
           cidrMask: 28,
-          name: "private",
+          name: "public",
+          subnetType: SubnetType.PUBLIC,
+        },
+        {
+          cidrMask: 28,
+          name: "private-with-egress",
+          subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+        },
+        {
+          cidrMask: 28,
+          name: "private-isolated",
           subnetType: SubnetType.PRIVATE_ISOLATED,
         },
       ],

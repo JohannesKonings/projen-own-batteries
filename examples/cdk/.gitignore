@@ -9,7 +9,8 @@ cdk.out
 !/tsconfig.json
 !/cdk.json
 !/lib/aspects/DeletionPolicySetter.ts
+!/lib/constructs/SsmQuickSetup.ts
 !/lib/constructs/Network.ts
+!/lib/constructs/Server.ts
 !/package.json
-cdk.out/
 !/.projenrc.ts

@@ -1,16 +1,20 @@
-import { Project, ProjectOptions, ProjenrcFile } from "projen";
+import { Project, ProjectOptions } from "projen";
 import { ComponentCdk } from "./components/cdk/componentCdk";
+import { ComponentAspectDeletionPolicySetter } from "./components/cdk/deletionPolicy/ComponentAspectDeletionPolicySetter";
 import { ComponentConstructNetwork } from "./components/cdk/network/componentConstructNetwork";
+import { ComponentConstructServer } from "./components/cdk/server/componentConstructServer";
 import { ComponentSops } from "./components/sops/componenteSops";
 import { ComponentTypescript } from "./components/typescript/componentTypescript";
-import { ComponentAspectDeletionPolicySetter } from "./components/cdk/deletionPolicy/ComponentAspectDeletionPolicySetter";
 import { OwnBatteriesProjenrc } from "./ownBatteriesProjenrc";
+import { ComponentConstructSsmQuickSetup } from "./components/cdk/ssmQuickSetup/componentConstructSsmQuickSetup";
 export interface OwnBatteriesProjectBaseOptions extends ProjectOptions {
   readonly isCdkProject?: boolean;
   readonly componentSops?: boolean;
   readonly componentsCdk?: {
     useNetwork?: boolean;
     userNetworkCheck?: boolean;
+    useServer?: boolean;
+    useSsmQuickSetup?: boolean;
   };
 }
 
@@ -39,8 +43,14 @@ export class OwnBatteriesBaseProject extends Project {
     if (options.isCdkProject) {
       new ComponentCdk(this);
       new ComponentAspectDeletionPolicySetter(this);
+      if (options.componentsCdk?.useSsmQuickSetup) {
+        new ComponentConstructSsmQuickSetup(this);
+      }
       if (options.componentsCdk?.useNetwork) {
         new ComponentConstructNetwork(this);
+      }
+      if (options.componentsCdk?.useServer) {
+        new ComponentConstructServer(this);
       }
     }
 
