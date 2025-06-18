@@ -7,6 +7,8 @@ import { Network } from "../constructs/Network";
 import { Server } from "../constructs/Server";
 import { Lambda } from "../constructs/Lambda";
 import { ApplicationsSignals } from "../constructs/ApplicationSignals";
+import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 
 export type StackMainProps = {};
 
@@ -27,9 +29,18 @@ export class StackMain extends Stack {
     // });
     new Lambda(this, "Lambda", {
       enableApplicationSignals: true,
+      enableSlo: true,
+    });
+    new Lambda(this, "Lambda2", {
+      enableApplicationSignals: true,
+      enableSlo: true,
     });
     new ApplicationsSignals(this, "ApplicationsSignals", {
       enableTransactionSearch: true,
     });
+
+    // new LogGroup(this, "LogGroup");
+
+    // new Bucket(this, "Bucket");
   }
 }

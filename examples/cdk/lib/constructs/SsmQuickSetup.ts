@@ -1,8 +1,9 @@
 import { CfnResource, Stack } from "aws-cdk-lib";
 import {
   InterfaceVpcEndpointAwsService,
-  IVpc,
+  // IVpc,
   SubnetType,
+  type IVpc,
 } from "aws-cdk-lib/aws-ec2";
 import {
   ArnPrincipal,

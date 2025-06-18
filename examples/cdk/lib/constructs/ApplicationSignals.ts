@@ -5,7 +5,7 @@ import {
   AwsCustomResourcePolicy,
   PhysicalResourceId,
 } from "aws-cdk-lib/custom-resources";
-import { NagSuppressions } from "cdk-nag";
+import { type NagPackSuppression, NagSuppressions } from "cdk-nag";
 import { Construct } from "constructs";
 
 type ApplicationsSignalsProps = {
@@ -81,6 +81,8 @@ export class ApplicationsSignals extends Construct {
     );
 
     if (props.enableTransactionSearch) {
+      const { account, region, stackName } = Stack.of(this);
+
       // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Transaction-Search-getting-started.html#w24aac24c21c13b9
       const applicationSignalsTransactionSearchLogsResourcePolicy =
         new AwsCustomResource(
@@ -102,14 +104,14 @@ export class ApplicationsSignals extends Construct {
                       Principal: {
                         Service: "xray.amazonaws.com",
                       },
-                      Action: "logs:PutLogEvents",
+                      Action: ["logs:PutLogEvents", "logs:CreateLogStream"],
                       Resource: [
-                        `arn:partition:logs:${region}:${account}:log-group:aws/spans:*`,
-                        `arn:partition:logs:${region}:${account}:log-group:/aws/application-signals/data:*`,
+                        `arn:aws:logs:${region}:${account}:log-group:aws/spans:*`,
+                        `arn:aws:logs:${region}:${account}:log-group:/aws/application-signals/data:*`,
                       ],
                       Condition: {
                         ArnLike: {
-                          "aws:SourceArn": `arn:partition:logs:${region}:${account}:*`,
+                          "aws:SourceArn": `arn:aws:xray:${region}:${account}:*`,
                         },
                         StringEquals: {
                           "aws:SourceAccount": account,
@@ -163,10 +165,39 @@ export class ApplicationsSignals extends Construct {
             ]),
           },
         );
+      applicationSignalsTransactionSearchXraySegmentDestination.node.addDependency(
+        applicationSignalsTransactionSearchLogsResourcePolicy,
+      );
+      const applicationSignalsTransactionSearchXrayIndexRule =
+        new AwsCustomResource(
+          this,
+          "ApplicationSignalsTransactionSearchXrayIndexRule",
+          {
+            onCreate: {
+              service: "@aws-sdk/client-xray",
+              action: "UpdateIndexingRule",
+              parameters: {
+                Name: "Default",
+                Rule: {
+                  Probabilistic: {
+                    DesiredSamplingPercentage: 100,
+                  },
+                },
+              },
+              physicalResourceId: PhysicalResourceId.of(
+                "ApplicationSignalsTransactionSearchXrayIndexRule",
+              ),
+            },
+            policy: AwsCustomResourcePolicy.fromSdkCalls({
+              resources: AwsCustomResourcePolicy.ANY_RESOURCE,
+            }),
+          },
+        );
       NagSuppressions.addResourceSuppressions(
         [
           applicationSignalsTransactionSearchXraySegmentDestination,
           applicationSignalsTransactionSearchLogsResourcePolicy,
+          applicationSignalsTransactionSearchXrayIndexRule,
         ],
         [
           {

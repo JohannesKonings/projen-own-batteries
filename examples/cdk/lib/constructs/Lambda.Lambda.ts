@@ -1,4 +1,6 @@
-const handler = async (event: undefined, context: undefined) => {
+import { createMiddyfiedGeneralEventHandler } from "@jaykingson/middyfied-lambda-handler";
+
+const middyHandler = async (event: any) => {
   console.log("lambda was called...");
   return {
     statusCode: 200,
@@ -7,4 +9,7 @@ const handler = async (event: undefined, context: undefined) => {
     }),
   };
 };
-module.exports = { handler };
+
+export const handler = createMiddyfiedGeneralEventHandler({
+  lambdaHandler: middyHandler,
+});

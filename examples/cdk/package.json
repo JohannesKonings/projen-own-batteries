@@ -1,5 +1,6 @@
 {
   "name": "cdk-project",
+  "type": "module",
   "scripts": {
     "build": "npx projen build",
     "compile": "npx projen compile",
@@ -12,13 +13,13 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.146",
-    "@types/node": "^22.10.3",
-    "aws-cdk": "2.174.0",
-    "cdk-nag": "2.34.23",
-    "esbuild": "^0.24.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "@types/aws-lambda": "8.10.149",
+    "@types/node": "^20.11.2",
+    "aws-cdk": "2.1018.1",
+    "cdk-nag": "2.36.18",
+    "esbuild": "0.25.5",
+    "tsx": "4.20.3",
+    "typescript": "5.8.3"
   },
   "dependencies": {
     "@aws-lambda-powertools/batch": "^2.12.0",
@@ -26,9 +27,10 @@
     "@aws-lambda-powertools/metrics": "^2.12.0",
     "@aws-lambda-powertools/parameters": "^2.12.0",
     "@aws-lambda-powertools/tracer": "^2.12.0",
-    "aws-cdk-lib": "2.174.0",
-    "constructs": "^10.4.2",
-    "zod": "^3.24.1"
+    "@jaykingson/middyfied-lambda-handler": "link:../../../middyfied-lambda-handler",
+    "aws-cdk-lib": "2.201.0",
+    "constructs": "10.4.2",
+    "zod": "3.25.64"
   },
   "license": "UNLICENSED",
   "version": "0.0.0",
