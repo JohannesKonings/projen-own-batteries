@@ -1,79 +1,71 @@
-import { Resource, Stack } from "aws-cdk-lib";
-import { Effect, PolicyStatement, Role } from "aws-cdk-lib/aws-iam";
-import {
-  AwsCustomResource,
-  AwsCustomResourcePolicy,
-  PhysicalResourceId,
-} from "aws-cdk-lib/custom-resources";
-import { NagSuppressions } from "cdk-nag";
+import { Stack } from "aws-cdk-lib";
+
+import { CfnTransactionSearchConfig } from "aws-cdk-lib/aws-xray";
+import { CfnResourcePolicy } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
-type ApplicationsSignalsProps = {};
-export class ApplicationsSignals extends Resource {
+import { CfnDiscovery } from "aws-cdk-lib/aws-applicationsignals";
+
+type ApplicationsSignalsProps = {
+  transactionSearch?: boolean | CfnTransactionSearchConfig; // Enable transaction search
+};
+export class ApplicationsSignals extends Construct {
   constructor(scope: Construct, id: string, props: ApplicationsSignalsProps) {
     super(scope, id);
 
-    const serviceLinkeRoleArnApplicationSignals = `arn:aws:iam::${Stack.of(this).account}:role/aws-service-role/application-signals.cloudwatch.amazonaws.com/AWSServiceRoleForCloudWatchApplicationSignals`;
-    const applicationSignalsStartDiscovery = new AwsCustomResource(
+    const { account, partition, region } = Stack.of(this);
+
+    new CfnDiscovery(this, "ApplicationSignalsDiscovery");
+
+    if (props.transactionSearch === false) {
+      return; // Skip creating the resource if transaction search is explicitly disabled
+    }
+
+    const transactionSearchAccess = new CfnResourcePolicy(
       this,
-      "ApplicationSignalsStartDiscovery",
+      "XRayLogResourcePolicy",
       {
-        onCreate: {
-          service: "@aws-sdk/client-application-signals",
-          action: "StartDiscovery",
-          physicalResourceId: PhysicalResourceId.of(
-            "ApplicationSignalsStartDiscovery",
-          ),
-        },
-        // policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
-        policy: AwsCustomResourcePolicy.fromStatements([
-          new PolicyStatement({
-            effect: Effect.ALLOW,
-            actions: ["iam:CreateServiceLinkedRole"],
-            resources: [serviceLinkeRoleArnApplicationSignals],
-          }),
-          new PolicyStatement({
-            effect: Effect.ALLOW,
-            actions: ["application-signals:StartDiscovery"],
-            resources: ["*"],
-          }),
-        ]),
+        policyName: "TransactionSearchAccess",
+        policyDocument: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Sid: "TransactionSearchXRayAccess",
+              Effect: "Allow",
+              Principal: {
+                Service: "xray.amazonaws.com",
+              },
+              Action: "logs:PutLogEvents",
+              Resource: [
+                `arn:${partition}:logs:${region}:${account}:log-group:aws/spans:*`,
+                `arn:${partition}:logs:${region}:${account}:log-group:/aws/application-signals/data:*`,
+              ],
+              Condition: {
+                ArnLike: {
+                  "aws:SourceArn": `arn:${partition}:xray:${region}:${account}:*`,
+                },
+                StringEquals: {
+                  "aws:SourceAccount": account,
+                },
+              },
+            },
+          ],
+        }),
       },
     );
 
-    const customResourceId = `AWS${AwsCustomResource.PROVIDER_FUNCTION_UUID.replaceAll("-", "")}`;
-    NagSuppressions.addResourceSuppressionsByPath(
-      Stack.of(this),
-      [
-        `/${Stack.of(this).stackName}/${customResourceId}/ServiceRole/Resource`,
-        `/${Stack.of(this).stackName}/${customResourceId}/Resource`,
-      ],
-      [
-        {
-          id: "AwsSolutions-L1",
-          reason: "CDK managed lambda function",
-        },
-        {
-          id: "AwsSolutions-IAM4",
-          reason: "CDK managed policy",
-        },
-        {
-          id: "AwsSolutions-IAM5",
-          reason: "CDK managed policy",
-        },
-      ],
-      true,
+    const transactionSearchConfig = new CfnTransactionSearchConfig(
+      this,
+      "XRayTransactionSearchConfig",
+      {
+        indexingPercentage:
+          typeof props.transactionSearch === "object" &&
+          props.transactionSearch !== null
+            ? props.transactionSearch.indexingPercentage
+            : 100,
+      },
     );
 
-    NagSuppressions.addResourceSuppressions(
-      applicationSignalsStartDiscovery,
-      [
-        {
-          id: "AwsSolutions-IAM5",
-          reason: "CDK managed policy",
-        },
-      ],
-      true,
-    );
+    transactionSearchConfig.node.addDependency(transactionSearchAccess);
   }
 }

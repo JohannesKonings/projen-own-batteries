@@ -18,7 +18,7 @@ export class OwnBatteriesAppProject extends OwnBatteriesBaseProject {
     });
 
     const nodePackage = new javascript.NodePackage(this, {
-      packageManager: javascript.NodePackageManager.NPM,
+      packageManager: javascript.NodePackageManager.PNPM,
       licensed: false,
       npmProvenance: false,
       entrypoint: "",

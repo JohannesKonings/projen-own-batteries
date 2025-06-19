@@ -45,6 +45,10 @@
       "type": "runtime"
     },
     {
+      "name": "@jaykingson/middyfied-lambda-handler",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
       "type": "runtime"
     },

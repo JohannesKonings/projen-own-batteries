@@ -7,6 +7,7 @@ import { ComponentSops } from "./components/sops/componenteSops";
 import { ComponentTypescript } from "./components/typescript/componentTypescript";
 import { OwnBatteriesProjenrc } from "./ownBatteriesProjenrc";
 import { ComponentConstructSsmQuickSetup } from "./components/cdk/ssmQuickSetup/componentConstructSsmQuickSetup";
+import { ComponentApplicationSignals } from "./components/cdk/cloudwatch/componentApplicationSignals";
 export interface OwnBatteriesProjectBaseOptions extends ProjectOptions {
   readonly isCdkProject?: boolean;
   readonly componentSops?: boolean;
@@ -15,6 +16,7 @@ export interface OwnBatteriesProjectBaseOptions extends ProjectOptions {
     userNetworkCheck?: boolean;
     useServer?: boolean;
     useSsmQuickSetup?: boolean;
+    useApplicationSignals?: boolean;
   };
 }
 
@@ -51,6 +53,9 @@ export class OwnBatteriesBaseProject extends Project {
       }
       if (options.componentsCdk?.useServer) {
         new ComponentConstructServer(this);
+      }
+      if (options.componentsCdk?.useApplicationSignals) {
+        new ComponentApplicationSignals(this);
       }
     }
 

@@ -31,12 +31,12 @@ export class StackMain extends Stack {
       enableApplicationSignals: true,
       enableSlo: true,
     });
-    new Lambda(this, "Lambda2", {
-      enableApplicationSignals: true,
-      enableSlo: true,
-    });
+    // new Lambda(this, "Lambda2", {
+    //   enableApplicationSignals: true,
+    //   enableSlo: true,
+    // });
     new ApplicationsSignals(this, "ApplicationsSignals", {
-      enableTransactionSearch: true,
+      transactionSearch: true,
     });
 
     // new LogGroup(this, "LogGroup");

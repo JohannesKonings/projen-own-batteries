@@ -12,5 +12,6 @@ cdk.out
 !/lib/constructs/SsmQuickSetup.ts
 !/lib/constructs/Network.ts
 !/lib/constructs/Server.ts
+!/lib/constructs/ApplicationSignals.ts
 !/package.json
 !/.projenrc.ts
