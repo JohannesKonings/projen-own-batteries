@@ -25,6 +25,22 @@ const project = new cdk.JsiiProject({
 
 project.eslint?.addIgnorePattern("examples/**/*");
 
+// use esm
+project.defaultTask?.reset();
+project.defaultTask?.exec("pnpx tsx --tsconfig tsconfig.dev.json .projenrc.ts");
+
+const packageJson = project.tryFindObjectFile("package.json");
+packageJson?.addOverride("type", "module");
+
+const tsconfigJson = project.tryFindObjectFile("tsconfig.dev.json");
+if (!tsconfigJson) {
+  throw new Error("tsconfig.dev.json not found");
+}
+tsconfigJson.addOverride("compilerOptions.module", "nodenext");
+tsconfigJson.addOverride("compilerOptions.esModuleInterop", true);
+tsconfigJson.addOverride("compilerOptions.target", "es2022");
+tsconfigJson.addOverride("compilerOptions.lib", ["es2022"]);
+
 // const tsconfigDevJson = project.tryFindObjectFile("tsconfig.dev.json");
 // tsconfigDevJson?.addToArray("include", "examples/**/*");
 

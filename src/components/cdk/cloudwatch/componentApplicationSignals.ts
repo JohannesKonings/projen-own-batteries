@@ -4,6 +4,8 @@ import { Component, TextFile } from "projen";
 
 import type { OwnBatteriesAppProject } from "../../../ownBatteriesAppProject";
 
+const __dirname = import.meta.dirname;
+
 export class ComponentApplicationSignals extends Component {
   readonly fileNameApplicationSignals = "ApplicationSignals.ts";
   constructor(project: OwnBatteriesAppProject) {

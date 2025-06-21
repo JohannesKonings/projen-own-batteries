@@ -1,10 +1,11 @@
 import { javascript } from "projen";
-import {
-  OwnBatteriesBaseProject,
-  OwnBatteriesProjectBaseOptions,
-} from "./ownBatteriesBaseProject";
+import type { OwnBatteriesProjectBaseOptions } from "./ownBatteriesBaseProject";
+import { OwnBatteriesBaseProject } from "./ownBatteriesBaseProject";
+import type { NodePackageOptions } from "projen/lib/javascript";
 export interface OwnBatteriesAppProjectOptions
-  extends OwnBatteriesProjectBaseOptions {}
+  extends OwnBatteriesProjectBaseOptions {
+  readonly nodePackageOptions?: Partial<NodePackageOptions>;
+}
 
 /**
  * TypeScript library
@@ -22,6 +23,7 @@ export class OwnBatteriesAppProject extends OwnBatteriesBaseProject {
       licensed: false,
       npmProvenance: false,
       entrypoint: "",
+      ...options.nodePackageOptions,
     });
 
     if (options.isCdkProject) {

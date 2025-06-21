@@ -10,6 +10,8 @@ import {
 
 import type { OwnBatteriesAppProject } from "../../ownBatteriesAppProject";
 
+const __dirname = import.meta.dirname;
+
 export class ComponentCdk extends Component {
   readonly fileNameAppTs = "app.ts";
   readonly fileNameCdkJson = "cdk.json";

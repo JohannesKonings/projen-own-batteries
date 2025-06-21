@@ -1,4 +1,5 @@
-import { Project, ProjectOptions } from "projen";
+import type { ProjectOptions } from "projen";
+import { Project } from "projen";
 import { ComponentCdk } from "./components/cdk/componentCdk";
 import { ComponentAspectDeletionPolicySetter } from "./components/cdk/deletionPolicy/ComponentAspectDeletionPolicySetter";
 import { ComponentConstructNetwork } from "./components/cdk/network/componentConstructNetwork";
@@ -8,6 +9,7 @@ import { ComponentTypescript } from "./components/typescript/componentTypescript
 import { OwnBatteriesProjenrc } from "./ownBatteriesProjenrc";
 import { ComponentConstructSsmQuickSetup } from "./components/cdk/ssmQuickSetup/componentConstructSsmQuickSetup";
 import { ComponentApplicationSignals } from "./components/cdk/cloudwatch/componentApplicationSignals";
+import type { NodePackageOptions } from "projen/lib/javascript";
 export interface OwnBatteriesProjectBaseOptions extends ProjectOptions {
   readonly isCdkProject?: boolean;
   readonly componentSops?: boolean;
@@ -18,6 +20,7 @@ export interface OwnBatteriesProjectBaseOptions extends ProjectOptions {
     useSsmQuickSetup?: boolean;
     useApplicationSignals?: boolean;
   };
+  readonly projenOptions?: Partial<ProjectOptions>;
 }
 
 /**
