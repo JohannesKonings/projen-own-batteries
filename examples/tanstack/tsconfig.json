@@ -32,12 +32,13 @@
     "strictNullChecks": true,
     "paths": {
       "~/*": [
-        "./src/webappFrontend/*"
+        "./src/webapp/*"
       ]
     }
   },
   "include": [
-    ".projenrc.ts"
+    ".projenrc.ts",
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

@@ -12,9 +12,21 @@ const project = new OwnBatteriesAppProject({
       "@jaykingson/middyfied-lambda-handler",
       "@tanstack/react-start",
       "@tanstack/react-router",
+      "@tanstack/react-router-devtools",
+
       "vite",
       "react",
       "react-dom",
+
+      "better-auth",
+
+      "@tanstack/react-router-with-query",
+      "@tanstack/react-query",
+      "@tanstack/react-query-devtools",
+      "@trpc/client",
+      "@trpc/server",
+      "@trpc/tanstack-react-query",
+      "superjson",
     ],
     devDeps: ["@types/react", "@types/react-dom", "vite-tsconfig-paths"],
   },
@@ -36,8 +48,9 @@ tsconfigJson?.addOverride("compilerOptions.module", "ESNext");
 tsconfigJson?.addOverride("compilerOptions.skipLibCheck", true);
 tsconfigJson?.addOverride("compilerOptions.strictNullChecks", true);
 tsconfigJson?.addOverride("compilerOptions.paths", {
-  "~/*": ["./src/webappFrontend/*"],
+  "~/*": ["./src/webapp/*"],
 });
+tsconfigJson?.addOverride("include", [".projenrc.ts", "src/**/*"]);
 
 project.addGitIgnore(".nitro");
 project.addGitIgnore(".output");

@@ -61,7 +61,23 @@
       "type": "runtime"
     },
     {
+      "name": "@tanstack/react-query",
+      "type": "runtime"
+    },
+    {
+      "name": "@tanstack/react-query-devtools",
+      "type": "runtime"
+    },
+    {
       "name": "@tanstack/react-router",
+      "type": "runtime"
+    },
+    {
+      "name": "@tanstack/react-router-devtools",
+      "type": "runtime"
+    },
+    {
+      "name": "@tanstack/react-router-with-query",
       "type": "runtime"
     },
     {
@@ -69,7 +85,23 @@
       "type": "runtime"
     },
     {
+      "name": "@trpc/client",
+      "type": "runtime"
+    },
+    {
+      "name": "@trpc/server",
+      "type": "runtime"
+    },
+    {
+      "name": "@trpc/tanstack-react-query",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
+      "type": "runtime"
+    },
+    {
+      "name": "better-auth",
       "type": "runtime"
     },
     {
@@ -82,6 +114,10 @@
     },
     {
       "name": "react-dom",
+      "type": "runtime"
+    },
+    {
+      "name": "superjson",
       "type": "runtime"
     },
     {

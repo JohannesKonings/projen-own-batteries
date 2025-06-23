@@ -8,7 +8,10 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    tsConfigPaths(),
+    tsConfigPaths({
+      root: "./",
+      projects: ["./tsconfig.json"],
+    }),
     tanstackStart({
       target: "aws_lambda", // https://nitro.build/deploy/providers/aws
       tsr: {

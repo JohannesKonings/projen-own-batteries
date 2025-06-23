@@ -1,9 +1,13 @@
 // src/routes/index.tsx
 import * as fs from 'node:fs'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
+import { useSession, signIn, signOut } from "../lib/auth-client"; // Import auth if needed
+
 const filePath = '/tmp/count.txt'
+
+
 
 async function readCount() {
   return parseInt(
@@ -32,8 +36,12 @@ export const Route = createFileRoute('/')({
 function Home() {
   const router = useRouter()
   const state = Route.useLoaderData()
+  const { data: session } = useSession()
+
+  console.log('Session data:', session)
 
   return (
+    <>
     <button
       type="button"
       onClick={() => {
@@ -44,5 +52,19 @@ function Home() {
     >
       Add 1 to {state}?
     </button>
+    <div>
+      <p>Current count: {state}</p>
+
+      {session ? (
+        <div>
+          <p>Welcome, {session.user.name}!</p>
+          <button onClick={() => signOut()}>Sign Out</button>
+        </div>
+      ) : (
+        <button onClick={() => signIn.social({ provider: "github" })}>Sign In</button>
+      )}
+      {session && <Link to="/dashboard">Dashboard</Link>}
+    </div>
+    </>
   )
 }
