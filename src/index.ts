@@ -1,9 +1,5 @@
-export {
-  OwnBatteriesProject,
-  OwnBatteriesProjectOptions,
-} from "./ownBatteriesProject";
-export {
-  OwnBatteriesBaseProject,
-  OwnBatteriesProjectBaseOptions as IOwnBatteriesProjectBaseOptions,
-} from "./ownBatteriesBaseProject";
-export { Sops } from "./components/sops/componente-sops";
+export type { OwnBatteriesProjectBaseOptions } from "./ownBatteriesBaseProject";
+export { OwnBatteriesAppProject } from "./ownBatteriesAppProject";
+export type { OwnBatteriesProjectBaseOptions as IOwnBatteriesProjectBaseOptions } from "./ownBatteriesBaseProject";
+export { OwnBatteriesBaseProject } from "./ownBatteriesBaseProject";
+export { ComponentSops as Sops } from "./components/sops/componenteSops";

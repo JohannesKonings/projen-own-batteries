@@ -1,7 +1,7 @@
 import { Component, SampleFile } from "projen";
 import { OwnBatteriesBaseProject } from "../../ownBatteriesBaseProject";
 
-export class Sops extends Component {
+export class ComponentSops extends Component {
   constructor(project: OwnBatteriesBaseProject) {
     super(project);
 
