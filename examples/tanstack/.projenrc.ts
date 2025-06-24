@@ -55,5 +55,6 @@ tsconfigJson?.addOverride("include", [".projenrc.ts", "src/**/*"]);
 project.addGitIgnore(".nitro");
 project.addGitIgnore(".output");
 project.addGitIgnore(".tanstack");
+project.addGitIgnore(".env-prod");
 
 project.synth();

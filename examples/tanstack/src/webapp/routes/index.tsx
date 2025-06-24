@@ -3,7 +3,7 @@ import * as fs from 'node:fs'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-import { useSession, signIn, signOut } from "../lib/auth-client"; // Import auth if needed
+import { useSession, signIn, signOut } from "~/lib/auth-client"; // Import auth if needed
 
 const filePath = '/tmp/count.txt'
 

@@ -14,6 +14,7 @@ export const Route = createFileRoute('/dashboard')({
     };
   },
    loader: async ({ context }) => {
+    console.log('Dashboard loader context:', context);
     if (!context.userID) {
       throw redirect({ to: "/" });
     }

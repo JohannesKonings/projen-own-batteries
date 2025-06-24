@@ -46,16 +46,32 @@ export class StackMain extends Stack {
       ),
       memorySize: 2048,
       timeout: Duration.seconds(60),
-      //   environment: {
-      //     // Add any environment variables needed by your app
-      //     NODE_ENV: isDev ? "development" : "production",
-      //     STAGE: stage,
-      //   },
+      environment: {
+        BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || "",
+        BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
+        GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || "",
+        GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || "",
+      },
     });
 
     // Create Lambda function URL
     const serverFunctionUrl = serverFunction.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE,
+    });
+
+    const cachePolicy = new CachePolicy(this, "CachePolicy", {
+      cachePolicyName: "TanStackStartCachePolicy",
+      comment: "Cache policy for TanStack Start application",
+      defaultTtl: Duration.days(1),
+      maxTtl: Duration.days(7),
+      minTtl: Duration.seconds(0),
+      enableAcceptEncodingBrotli: true,
+      enableAcceptEncodingGzip: true,
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Authorization"),
+      cookieBehavior: cloudfront.CacheCookieBehavior.all(),
+      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+      // enableAcceptEncodingBrotli: true,
+      // enableAcceptEncodingGzip: true,
     });
 
     // Create CloudFront distribution
@@ -64,7 +80,8 @@ export class StackMain extends Stack {
       defaultBehavior: {
         origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: CachePolicy.CACHING_DISABLED,
+        // cachePolicy: CachePolicy.CACHING_DISABLED,
+        cachePolicy,
         allowedMethods: AllowedMethods.ALLOW_ALL,
         originRequestPolicy: OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },

@@ -7,6 +7,10 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  define: {
+    // Expose environment variables to the client
+    "process.env.BETTER_AUTH_URL": JSON.stringify(process.env.BETTER_AUTH_URL),
+  },
   plugins: [
     tsConfigPaths({
       root: "./",
