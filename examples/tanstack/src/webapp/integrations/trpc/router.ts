@@ -13,6 +13,9 @@ const peopleRouter = {
   currentUserName: protectedProcedure.query(async (opts) => {
     return opts.ctx.session?.user?.name;
   }),
+  serverPing: publicProcedure.query(async (opts) => {
+    return "pong";
+  }),
 } satisfies TRPCRouterRecord;
 
 export const trpcRouter = createTRPCRouter({

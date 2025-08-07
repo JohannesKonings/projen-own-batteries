@@ -43,7 +43,7 @@ function RouteComponent() {
     queryFn: () => fetch('/api/name').then(res => res.json()),
   })
 
-    const trpc = useTRPC();
+  const trpc = useTRPC();
   const { data: userNameFromTRPC } = useQuery({
     ...trpc.people.currentUserName.queryOptions(),
   });

@@ -27,6 +27,13 @@ const project = new OwnBatteriesAppProject({
       "@trpc/server",
       "@trpc/tanstack-react-query",
       "superjson",
+
+      // lambda@edge
+      "@aws-sdk/signature-v4",
+      "@aws-sdk/credential-providers",
+      "@aws-sdk/protocol-http",
+
+      "nitropack",
     ],
     devDeps: ["@types/react", "@types/react-dom", "vite-tsconfig-paths"],
   },

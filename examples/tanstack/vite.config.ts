@@ -18,6 +18,10 @@ export default defineConfig({
     }),
     tanstackStart({
       target: "aws_lambda", // https://nitro.build/deploy/providers/aws
+      // client routing with cloudfront not working
+      // spa: {
+      //   enabled: true,
+      // },
       tsr: {
         srcDirectory: "src/webapp",
         routesDirectory: "src/webapp/routes",

@@ -12,7 +12,12 @@ const env: Environment = {
 };
 
 const appMain = () => {
-  new StackMain(app, "TanStackStartCDK", {});
+  new StackMain(app, "TanStackStartCDK", {
+    env: {
+      ...env,
+      region: "us-east-1", // lambda@edge requires us-east-1
+    },
+  });
 
   Aspects.of(app).add(new AwsSolutionsChecks());
 };

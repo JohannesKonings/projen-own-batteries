@@ -4,6 +4,7 @@ import { getSession } from "~/lib/auth-client";
 
 export const authMiddleware = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
+    console.log("Running auth middleware", next);
     const { data: session } = await getSession({
       fetchOptions: {
         headers: getHeaders() as HeadersInit,

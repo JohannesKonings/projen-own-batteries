@@ -57,6 +57,18 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/credential-providers",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/protocol-http",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/signature-v4",
+      "type": "runtime"
+    },
+    {
       "name": "@jaykingson/middyfied-lambda-handler",
       "type": "runtime"
     },
@@ -106,6 +118,10 @@
     },
     {
       "name": "constructs",
+      "type": "runtime"
+    },
+    {
+      "name": "nitropack",
       "type": "runtime"
     },
     {

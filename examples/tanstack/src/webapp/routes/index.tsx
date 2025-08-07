@@ -4,6 +4,9 @@ import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 import { useSession, signIn, signOut } from "~/lib/auth-client"; // Import auth if needed
+import { useTRPC } from '~/integrations/trpc/react';
+import { useQuery } from '@tanstack/react-query';
+import { getHeaders } from '@tanstack/react-start/server';
 
 const filePath = '/tmp/count.txt'
 
@@ -18,12 +21,14 @@ async function readCount() {
 const getCount = createServerFn({
   method: 'GET',
 }).handler(() => {
+   console.log('headersjkGET', getHeaders())
   return readCount()
 })
 
 const updateCount = createServerFn({ method: 'POST' })
   .validator((d: number) => d)
   .handler(async ({ data }) => {
+    console.log('headersjkPOST', getHeaders())
     const count = await readCount()
     await fs.promises.writeFile(filePath, `${count + data}`)
   })
@@ -33,10 +38,17 @@ export const Route = createFileRoute('/')({
   loader: async () => await getCount(),
 })
 
+
+
 function Home() {
   const router = useRouter()
   const state = Route.useLoaderData()
   const { data: session } = useSession()
+
+  const trpc = useTRPC();
+  const { data: serverPing } = useQuery({
+    ...trpc.people.serverPing.queryOptions(),
+  });
 
   console.log('Session data:', session)
 
@@ -54,6 +66,7 @@ function Home() {
     </button>
     <div>
       <p>Current count: {state}</p>
+      <p>Server Ping: {serverPing}</p>
 
       {session ? (
         <div>
