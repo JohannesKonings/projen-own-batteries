@@ -52,4 +52,11 @@ junit.xml
 .jsii
 tsconfig.json
 !/API.md
+**/.env
+**/.env.*
+**/.env-*
+**/env
+**/env.*
+**/env-*
+!**/.env.example
 !/.projenrc.ts
