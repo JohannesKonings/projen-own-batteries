@@ -15,6 +15,7 @@ const project = new OwnBatteriesAppProject({
       "@tanstack/react-router-devtools",
 
       "vite",
+      "@vitejs/plugin-react",
       "react",
       "react-dom",
 

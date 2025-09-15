@@ -1,6 +1,5 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
@@ -12,18 +11,15 @@ import { Duration } from "aws-cdk-lib";
 import {
   Code,
   FunctionUrlAuthType,
-  HttpMethod,
   InvokeMode,
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import {
   AllowedMethods,
-  CachePolicy,
   Distribution,
   HeadersFrameOption,
   HeadersReferrerPolicy,
   LambdaEdgeEventType,
-  OriginRequestPolicy,
   PriceClass,
   ResponseHeadersPolicy,
   ViewerProtocolPolicy,
@@ -34,12 +30,9 @@ import {
   CfnDeliverySource,
   LogGroup,
 } from "aws-cdk-lib/aws-logs";
-import {
-  NodejsFunction,
-  OutputFormat,
-  SourceMapMode,
-} from "aws-cdk-lib/aws-lambda-nodejs";
+// (removed NodejsFunction bundling; using plain Lambda with Nitro output)
 import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { AiOps } from "../constructs/AiOps";
 
 export interface StackMainProps extends StackProps {}
 
@@ -89,40 +82,66 @@ export class StackMain extends Stack {
     //     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || "",
     //   },
     // });
-    const serverFunction = new NodejsFunction(this, "ServerFunction", {
+    const serverFunction = new lambda.Function(this, "ServerFunction", {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: path.join(
-        import.meta.dirname,
-        "../../src/lambdas/serverFunction.ts",
+      handler: "index.handler",
+      code: lambda.Code.fromAsset(
+        path.join(
+          path.dirname(new URL(import.meta.url).pathname),
+          "../../.output/server",
+        ),
       ),
-      // handler: "index.handler",
       memorySize: 2048,
       timeout: Duration.seconds(60),
-      bundling: {
-        sourceMap: true,
-        sourceMapMode: SourceMapMode.EXTERNAL,
-        // ESM important properties:
-        mainFields: ["module", "main"],
-        format: OutputFormat.ESM,
-        banner:
-          "const require = (await import('node:module')).createRequire(import.meta.url);",
+      environment: {
+        BETTER_AUTH_SECRET:
+          process.env.BETTER_AUTH_SECRET ||
+          (() => {
+            throw new Error(
+              "BETTER_AUTH_SECRET environment variable is required",
+            );
+          })(),
+        BETTER_AUTH_URL:
+          process.env.BETTER_AUTH_URL ||
+          (() => {
+            throw new Error("BETTER_AUTH_URL environment variable is required");
+          })(),
+        VITE_BETTER_AUTH_URL:
+          process.env.VITE_BETTER_AUTH_URL ||
+          (() => {
+            throw new Error(
+              "VITE_BETTER_AUTH_URL environment variable is required",
+            );
+          })(),
+        GITHUB_CLIENT_ID:
+          process.env.GITHUB_CLIENT_ID ||
+          (() => {
+            throw new Error(
+              "GITHUB_CLIENT_ID environment variable is required",
+            );
+          })(),
+        GITHUB_CLIENT_SECRET:
+          process.env.GITHUB_CLIENT_SECRET ||
+          (() => {
+            throw new Error(
+              "GITHUB_CLIENT_SECRET environment variable is required",
+            );
+          })(),
+        NODE_ENV: "production",
       },
-      // environment: {
-      //   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || "",
-      //   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
-      //   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || "",
-      //   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || "",
-      // },
     });
 
     const authFunction = new cloudfront.experimental.EdgeFunction(
       this,
       "AuthFunctionAtEdge",
       {
-        handler: "auth.handler",
-        runtime: Runtime.NODEJS_22_X,
+        handler: "auth.handler", // Use the CommonJS auth.js for Lambda@Edge compatibility
+        runtime: Runtime.NODEJS_18_X,
         code: Code.fromAsset(
-          path.join(import.meta.dirname, "../../src/lambdas/"),
+          path.join(
+            path.dirname(new URL(import.meta.url).pathname),
+            "../../src/lambdas/",
+          ),
         ),
         //    entry: path.join(
         //   import.meta.dirname,
@@ -145,44 +164,17 @@ export class StackMain extends Stack {
 
     // Create Lambda function URL
     const serverFunctionUrl = serverFunction.addFunctionUrl({
+      // Enforce IAM between CloudFront and Lambda Function URL
       authType: FunctionUrlAuthType.AWS_IAM,
-      // invokeMode: InvokeMode.RESPONSE_STREAM,
       invokeMode: InvokeMode.BUFFERED,
-      cors: {
-        allowedOrigins: ["*"],
-        allowedMethods: [HttpMethod.ALL],
-        allowedHeaders: ["*"],
-        allowCredentials: false,
-      },
+      // CORS config is not relevant for IAM-authenticated Function URLs accessed by CloudFront
     });
 
-    const cachePolicy = new CachePolicy(this, "CachePolicy", {
-      cachePolicyName: "TanStackStartCachePolicy",
-      comment: "Cache policy for TanStack Start application",
-      defaultTtl: Duration.days(1),
-      maxTtl: Duration.days(7),
-      minTtl: Duration.seconds(0),
-      enableAcceptEncodingBrotli: true,
-      enableAcceptEncodingGzip: true,
-      headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Authorization"),
-      cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-      // enableAcceptEncodingBrotli: true,
-      // enableAcceptEncodingGzip: true,
-    });
+    // IMPORTANT: Disable SSR caching to avoid caching authenticated HTML responses
+    // Static assets are handled via additionalBehaviors with optimized caching.
 
-    const originRequestPolicy = new OriginRequestPolicy(
-      this,
-      "OriginRequestPolicy",
-      {
-        originRequestPolicyName: "TanStackStartOriginRequestPolicy",
-        comment: "Origin request policy for TanStack Start application",
-        headerBehavior:
-          cloudfront.OriginRequestHeaderBehavior.allowList("Set-Cookie"),
-        cookieBehavior: cloudfront.OriginRequestCookieBehavior.all(),
-        queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
-      },
-    );
+    // Use a managed policy to forward all viewer headers (except Host) to the origin.
+    // This preserves SigV4 headers added by the Lambda@Edge signer.
 
     // @see https://securityheaders.com
     // @see https://observatory.mozilla.org
@@ -227,32 +219,48 @@ export class StackMain extends Stack {
     );
 
     // Create CloudFront distribution
+    // Managed origin request policy: forward all viewer headers except Host.
+    const managedOriginRequestPolicy =
+      cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER;
     const distribution = new Distribution(this, "Distribution", {
       comment: `TanStackStartCDK`,
       defaultBehavior: {
-        // origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
-        origin:
-          origins.FunctionUrlOrigin.withOriginAccessControl(serverFunctionUrl),
+        origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        // cachePolicy: CachePolicy.CACHING_DISABLED,
-        cachePolicy,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
         allowedMethods: AllowedMethods.ALLOW_ALL,
-        // originRequestPolicy: OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
-        originRequestPolicy,
+        originRequestPolicy: managedOriginRequestPolicy,
         responseHeadersPolicy,
-        // responseHeadersPolicy:
-        //   ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
-        // edgeLambdas: [
-        //   {
-        //     functionVersion: authFunction.currentVersion,
-        //     eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
-        //     includeBody: true,
-        //   },
-        // ],
+        // Attach signer to sign requests with SigV4 for the Function URL (AWS_IAM)
+        edgeLambdas: [
+          {
+            functionVersion: authFunction.currentVersion,
+            // Revert to ORIGIN_REQUEST so origin.custom.domainName is available (Function URL host)
+            eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
+            includeBody: true,
+          },
+        ],
       },
       logIncludesCookies: true,
       priceClass: PriceClass.PRICE_CLASS_100, // Use Price Class 100 for lower cost
       additionalBehaviors: {
+        "/api/*": {
+          origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+          allowedMethods: AllowedMethods.ALLOW_ALL,
+          originRequestPolicy: managedOriginRequestPolicy,
+          responseHeadersPolicy,
+          edgeLambdas: [
+            {
+              functionVersion: authFunction.currentVersion,
+              // Revert to ORIGIN_REQUEST so origin.custom.domainName is available (Function URL host)
+              eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
+              includeBody: true,
+            },
+          ],
+        },
         "/_build/*": {
           origin:
             origins.S3BucketOrigin.withOriginAccessControl(staticAssetsBucket),
@@ -340,7 +348,10 @@ export class StackMain extends Stack {
     new s3deploy.BucketDeployment(this, "DeployStaticAssets", {
       sources: [
         s3deploy.Source.asset(
-          path.join(import.meta.dirname, "../../.output/public"),
+          path.join(
+            path.dirname(new URL(import.meta.url).pathname),
+            "../../.output/public",
+          ),
         ),
       ],
       destinationBucket: staticAssetsBucket,
@@ -357,5 +368,7 @@ export class StackMain extends Stack {
       value: serverFunctionUrl.url,
       description: "URL of the Lambda function",
     });
+
+    new AiOps(this, "AiOps", {});
   }
 }

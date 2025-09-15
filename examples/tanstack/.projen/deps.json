@@ -109,6 +109,10 @@
       "type": "runtime"
     },
     {
+      "name": "@vitejs/plugin-react",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
       "type": "runtime"
     },

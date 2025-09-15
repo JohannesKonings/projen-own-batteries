@@ -1,0 +1,40 @@
+{
+  "servers": {
+    "context7": {
+      "type": "stdio",
+      "command": "pnpx",
+      "args": ["@upstash/context7-mcp"]
+    },
+    "awslabs.cloudwatch-mcp-server": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["awslabs.cloudwatch-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    },
+    "awslabs.cdk-mcp-server": {
+      "command": "uvx",
+      "args": ["awslabs.cdk-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    },
+    "awslabs.aws-documentation-mcp-server": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      }
+    },
+    "awslabs.core-mcp-server": {
+      "command": "uvx",
+      "args": ["awslabs.core-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    }
+  }
+}

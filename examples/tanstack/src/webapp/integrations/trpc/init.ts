@@ -1,16 +1,20 @@
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { auth } from "~/lib/auth";
 import { TRPCError } from "@trpc/server";
 
-export const createContext = async (opts: CreateNextContextOptions) => {
-  const session = await auth.api.getSession({
-    headers: opts.req.headers,
-  });
-  return {
-    session,
-  };
+export const createContext = async (opts: FetchCreateContextFnOptions) => {
+  try {
+    const session = await auth.api.getSession({
+      // opts.req is a standard Web Fetch Request
+      headers: opts.req.headers,
+    });
+    return { session };
+  } catch (error) {
+    console.error("Error creating tRPC context:", error);
+    return { session: null };
+  }
 };
 
 const t = initTRPC.context<typeof createContext>().create({

@@ -23,21 +23,14 @@ export const handler = async (event) => {
   // remove the x-forwarded-for from the signature
   delete headers["x-forwarded-for"];
 
-  if (!request.origin.hasOwnProperty("custom"))
-    throw (
-      "Unexpected origin type. Expected 'custom'. Got: " +
-      JSON.stringify(request.origin)
-    );
+  // Origin is the Lambda Function URL (custom origin). Proceed.
 
-  // remove the "behaviour" path from the uri to send to Lambda
-  // ex: /updateBook/1234 => /1234
-  let uri = request.uri.substring(1);
-  let urisplit = uri.split("/");
-  urisplit.shift(); // remove the first part (getBooks, createBook, ...)
-  uri = "/" + urisplit.join("/");
-  request.uri = uri;
+  // Keep the full URI intact; we are fronting the entire app and /api/* must remain
+  const uri = request.uri;
 
-  const hostname = request.headers["host"][0].value;
+  // The custom origin host is the Lambda Function URL domain
+  const hostname =
+    request.origin?.custom?.domainName || request.headers["host"][0].value;
   const region = hostname.split(".")[2];
   const path = uri + (request.querystring ? "?" + request.querystring : "");
 

@@ -1,0 +1,21 @@
+# Production Environment Configuration for AWS Deployment
+# ⚠️ WARNING: This file contains placeholder values only!
+# Replace all placeholder values with your actual credentials before deployment
+# NEVER commit actual credentials to version control
+
+# Better Auth Configuration - CRITICAL for production
+BETTER_AUTH_SECRET=your-secure-random-secret-key-here
+# Replace with your actual CloudFront domain
+BETTER_AUTH_URL=https://your-cloudfront-domain.cloudfront.net
+VITE_BETTER_AUTH_URL=https://your-cloudfront-domain.cloudfront.net
+
+# GitHub OAuth Configuration - Replace with your actual values
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# AWS Deployment Configuration
+APP_ACCOUNT=your-aws-account-id
+APP_REGION=us-east-1
+
+# Node Environment
+NODE_ENV=production
