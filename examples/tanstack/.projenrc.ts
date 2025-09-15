@@ -64,5 +64,7 @@ project.addGitIgnore(".nitro");
 project.addGitIgnore(".output");
 project.addGitIgnore(".tanstack");
 project.addGitIgnore(".env-prod");
+// Also ignore non-dot production env file name used in this repo
+project.addGitIgnore("env-prod");
 
 project.synth();
