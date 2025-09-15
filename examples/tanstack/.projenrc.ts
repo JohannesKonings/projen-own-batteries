@@ -67,4 +67,14 @@ project.addGitIgnore(".env-prod");
 // Also ignore non-dot production env file name used in this repo
 project.addGitIgnore("env-prod");
 
+// Global gitignore hardening for environment files (never commit secrets)
+project.addGitIgnore("**/.env");
+project.addGitIgnore("**/.env.*");
+project.addGitIgnore("**/.env-*");
+project.addGitIgnore("**/env");
+project.addGitIgnore("**/env.*");
+project.addGitIgnore("**/env-*");
+// Keep sample env files if present
+project.addGitIgnore("!**/.env.example");
+
 project.synth();

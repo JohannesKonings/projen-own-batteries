@@ -15,4 +15,12 @@ cdk.out
 .output
 .tanstack
 .env-prod
+env-prod
+**/.env
+**/.env.*
+**/.env-*
+**/env
+**/env.*
+**/env-*
+!**/.env.example
 !/.projenrc.ts

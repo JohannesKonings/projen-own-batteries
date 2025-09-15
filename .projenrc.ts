@@ -25,6 +25,16 @@ const project = new cdk.JsiiProject({
 
 project.eslint?.addIgnorePattern("examples/**/*");
 
+// Global gitignore hardening for environment files (never commit secrets)
+project.addGitIgnore("**/.env");
+project.addGitIgnore("**/.env.*");
+project.addGitIgnore("**/.env-*");
+project.addGitIgnore("**/env");
+project.addGitIgnore("**/env.*");
+project.addGitIgnore("**/env-*");
+// Keep sample env files if present
+project.addGitIgnore("!**/.env.example");
+
 // use esm
 project.defaultTask?.reset();
 project.defaultTask?.exec("pnpx tsx --tsconfig tsconfig.dev.json .projenrc.ts");
