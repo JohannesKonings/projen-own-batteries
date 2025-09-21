@@ -13,7 +13,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCRouter } from "~/integrations/trpc/router";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
-interface RouterContext {
+export interface RouterContext {
   queryClient: QueryClient;
   trpc: TRPCOptionsProxy<TRPCRouter>;
 }
@@ -34,6 +34,7 @@ export const Route = createRootRoute<RouterContext>({
     ],
   }),
   component: RootComponent,
+  notFoundComponent: () => <div>Root not found</div>,
 })
 
 function RootComponent() {

@@ -1,23 +1,26 @@
 import { betterAuth } from "better-auth";
 import { reactStartCookies } from "better-auth/react-start";
 
-// Fail-fast env accessor for required variables (spec: required error throwing)
+// Fail-fast env accessor for required variables (evaluated at runtime)
 const env = (key: string): string => {
-  const val = process.env[key];
+  const val = (globalThis as any)?.process?.env?.[key];
   if (!val) throw new Error(`${key} required`);
-  return val;
+  return val as string;
 };
 
 const isProd = process.env.NODE_ENV === "production";
 
-// Normalize baseURL once; prefer BETTER_AUTH_URL then VITE_BETTER_AUTH_URL then localhost
-const rawBaseURL =
-  process.env.BETTER_AUTH_URL ||
-  process.env.VITE_BETTER_AUTH_URL ||
-  "http://localhost:3000";
-
-// Strip trailing slash for consistency
-const baseURL = new URL(rawBaseURL).toString().replace(/\/$/, "");
+// Resolve baseURL at runtime to avoid build-time env inlining
+const resolveBaseURL = () => {
+  const raw =
+    (globalThis as any)?.process?.env?.["BETTER_AUTH_URL"] ||
+    (globalThis as any)?.process?.env?.["VITE_BETTER_AUTH_URL"] ||
+    "http://localhost:3000";
+  const url = new URL(raw).toString().replace(/\/$/, "");
+  return url;
+};
+const baseURL = resolveBaseURL();
+console.log("Using Better Auth URL:", baseURL);
 
 // Guard: enforce HTTPS in production
 if (isProd && !baseURL.startsWith("https://")) {
@@ -43,9 +46,8 @@ export const auth = betterAuth({
       clientSecret: env("GITHUB_CLIENT_SECRET"),
       // Ensure callback URL points to exact domain and path
       redirectURI: new URL("/api/auth/callback/github", baseURL).toString(),
-      // Example hardening toggles (optional):
-      // disableImplicitSignUp: true,
-      // overrideUserInfoOnSignIn: true,
+      // Allow implicit sign up for social login
+      disableImplicitSignUp: false,
     },
   },
 

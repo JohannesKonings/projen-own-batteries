@@ -1,0 +1,288 @@
+openapi: 3.0.3
+info:
+  title: TanStack Start API
+  description: API specification for TanStack Start application with CloudFront and Lambda
+  version: 1.0.0
+  contact:
+    name: TanStack Start API
+    url: https://tanstack.com/start
+
+servers:
+  - url: https://{domain}/api
+    description: CloudFront distribution
+    variables:
+      domain:
+        default: example.cloudfront.net
+        description: CloudFront domain name
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns service health status for monitoring
+      operationId: getHealth
+      tags:
+        - System
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                required: [status, timestamp, version]
+
+  /auth/login:
+    post:
+      summary: User authentication
+      description: Authenticate user and create session
+      operationId: authenticateUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                rememberMe:
+                  type: boolean
+                  default: false
+              required: [email, password]
+      responses:
+        "200":
+          description: Authentication successful
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+                  sessionId:
+                    type: string
+                    format: uuid
+                required: [user, sessionId]
+        "401":
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/logout:
+    post:
+      summary: User logout
+      description: Invalidate user session
+      operationId: logoutUser
+      tags:
+        - Authentication
+      security:
+        - sessionAuth: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/me:
+    get:
+      summary: Get current user
+      description: Get authenticated user information
+      operationId: getCurrentUser
+      tags:
+        - Authentication
+      security:
+        - sessionAuth: []
+      responses:
+        "200":
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /user/preferences:
+    get:
+      summary: Get user preferences
+      description: Retrieve user application preferences
+      operationId: getUserPreferences
+      tags:
+        - User
+      security:
+        - sessionAuth: []
+      responses:
+        "200":
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update user preferences
+      description: Update user application preferences
+      operationId: updateUserPreferences
+      tags:
+        - User
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPreferences"
+      responses:
+        "200":
+          description: Preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+        "400":
+          description: Invalid preferences data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+      required: [id, email, name, createdAt]
+
+    UserPreferences:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [light, dark, system]
+          default: system
+        language:
+          type: string
+          pattern: "^[a-z]{2}$"
+          default: en
+        notifications:
+          type: object
+          properties:
+            email:
+              type: boolean
+              default: true
+            push:
+              type: boolean
+              default: false
+          required: [email, push]
+        ui:
+          type: object
+          properties:
+            compactMode:
+              type: boolean
+              default: false
+            sidebarCollapsed:
+              type: boolean
+              default: false
+          required: [compactMode, sidebarCollapsed]
+      required: [theme, language, notifications, ui]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+          format: uuid
+      required: [error, message, timestamp, requestId]
+
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session-token
+      description: Session-based authentication using secure HTTP-only cookies
+
+security:
+  - sessionAuth: []
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Authentication
+    description: User authentication and session management
+  - name: User
+    description: User profile and preferences management

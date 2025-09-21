@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { getAvatar, getUserID } from '~/lib/auth-server-func'
 import { signOut } from '~/lib/auth-client';
 import { useEffect, useState } from 'react';
@@ -26,7 +26,6 @@ export const Route = createFileRoute('/dashboard')({
 
 function RouteComponent() {
   const { userID } = Route.useLoaderData()
-  const navigate = useNavigate();
 
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
 
@@ -60,7 +59,7 @@ function RouteComponent() {
       <button
         type="button"
         onClick={async () =>
-          signOut({}, { onSuccess: () => { navigate({ to: '/' }) } })
+          signOut({}, { onSuccess: () => { window.location.href = '/' } })
         }
       >
         Sign Out

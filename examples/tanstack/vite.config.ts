@@ -1,6 +1,6 @@
 // vite.config.ts
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import vitereact from "@vitejs/plugin-react";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
@@ -16,6 +16,7 @@ export default defineConfig({
   plugins: [
     tanstackStart({
       target: "aws_lambda", // https://nitro.build/deploy/providers/aws
+      // target: "node-server", // for local development
       customViteReactPlugin: true,
       // client routing with cloudfront not working
       // spa: {
@@ -27,7 +28,7 @@ export default defineConfig({
         generatedRouteTree: "src/webapp/routeTree.gen.ts",
       },
     }),
-    react(),
+    vitereact(),
     tsConfigPaths({
       root: "./",
       projects: ["./tsconfig.json"],

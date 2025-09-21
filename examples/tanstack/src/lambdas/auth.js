@@ -70,7 +70,26 @@ exports.handler = async (event) => {
 
   // Preserve full path + query
   const canonicalUri = request.uri || "/";
-  const canonicalQueryString = request.querystring || "";
+  const canonicalQueryString = (() => {
+    const qs = request.querystring || "";
+    if (!qs) return "";
+    // Canonicalize per AWS SigV4: sort by key, then value; percent-encode RFC 3986
+    const enc = (s) =>
+      encodeURIComponent(s)
+        .replace(/[!*'()]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+    return qs
+      .split("&")
+      .filter((p) => p.length > 0)
+      .map((p) => {
+        const idx = p.indexOf("=");
+        const k = idx >= 0 ? p.substring(0, idx) : p;
+        const v = idx >= 0 ? p.substring(idx + 1) : "";
+        return { k: enc(k), v: enc(v) };
+      })
+      .sort((a, b) => (a.k === b.k ? (a.v < b.v ? -1 : a.v > b.v ? 1 : 0) : a.k < b.k ? -1 : 1))
+      .map(({ k, v }) => `${k}=${v}`)
+      .join("&");
+  })();
 
   // Body hashing
   let payload = "";
@@ -98,6 +117,10 @@ exports.handler = async (event) => {
     signedHeadersList.push("content-type");
   }
 
+  // Content SHA256 for payload (recommended/required by some services, ensures no body rewrites)
+  canonHeaders["x-amz-content-sha256"] = payloadHash;
+  signedHeadersList.push("x-amz-content-sha256");
+
   // Session token if present
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -113,12 +136,13 @@ exports.handler = async (event) => {
 
   // Include any additional headers that must be signed (none required here)
 
-  // Build canonical headers string
-  const canonicalHeaders = signedHeadersList
-    .map((h) => `${h}:${String(canonHeaders[h]).trim()}`)
-    .join("\n") + "\n";
+  // Build canonical headers string (headers must be lowercase, trimmed, and sorted)
+  const normalizeHeaderValue = (v) => String(v).replace(/\s+/g, " ").trim();
+  const sortedHeaderNames = Array.from(new Set(signedHeadersList.map((h) => h.toLowerCase()))).sort();
+  const canonicalHeaders =
+    sortedHeaderNames.map((h) => `${h}:${normalizeHeaderValue(canonHeaders[h])}`).join("\n") + "\n";
 
-  const signedHeaders = signedHeadersList.join(";");
+  const signedHeaders = sortedHeaderNames.join(";");
 
   const canonicalRequest = [
     request.method || "GET",
@@ -150,6 +174,9 @@ exports.handler = async (event) => {
   request.headers = request.headers || {};
   request.headers["host"] = [{ key: "Host", value: originHost }];
   request.headers["x-amz-date"] = [{ key: "x-amz-date", value: amzDate }];
+  request.headers["x-amz-content-sha256"] = [
+    { key: "x-amz-content-sha256", value: payloadHash },
+  ];
   if (sessionToken) {
     request.headers["x-amz-security-token"] = [
       { key: "x-amz-security-token", value: sessionToken },

@@ -37,7 +37,7 @@ export class AiOps extends Construct {
     // );
 
     new CfnInvestigationGroup(this, "AiOpsInvestigationGroup", {
-      name: "default",
+      name: "default2",
       roleArn: roleAiOpsInvestigationGroup.roleArn,
       // You can also configure retention and encryption here if needed
       // retentionInDays: 30,

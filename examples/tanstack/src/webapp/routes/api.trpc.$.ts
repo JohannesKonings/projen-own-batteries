@@ -22,24 +22,9 @@ function handler({ request }: { request: Request }) {
 export const ServerRoute = createServerFileRoute("/api/trpc/$").methods({
   GET: handler,
   POST: handler,
-  OPTIONS: async ({ request }) => {
-    const origin = request.headers.get("origin") ?? "*";
-    const allowedOrigins = [
-      process.env.BETTER_AUTH_URL,
-      process.env.VITE_BETTER_AUTH_URL,
-      "http://localhost:3000",
-      "https://localhost:3000",
-    ].filter(Boolean) as string[];
-
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin":
-          origin && allowedOrigins.includes(origin) ? origin : "*",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
-      },
-    });
-  },
 });
+
+// export const ServerRoute = createServerFileRoute("/api/auth/$").methods({
+//   GET: handler,
+//   POST: handler,
+// });

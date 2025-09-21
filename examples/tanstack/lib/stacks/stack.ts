@@ -136,7 +136,7 @@ export class StackMain extends Stack {
       "AuthFunctionAtEdge",
       {
         handler: "auth.handler", // Use the CommonJS auth.js for Lambda@Edge compatibility
-        runtime: Runtime.NODEJS_18_X,
+        runtime: Runtime.NODEJS_22_X,
         code: Code.fromAsset(
           path.join(
             path.dirname(new URL(import.meta.url).pathname),
@@ -225,7 +225,9 @@ export class StackMain extends Stack {
     const distribution = new Distribution(this, "Distribution", {
       comment: `TanStackStartCDK`,
       defaultBehavior: {
-        origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
+        // origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
+        origin:
+          origins.FunctionUrlOrigin.withOriginAccessControl(serverFunctionUrl),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
         allowedMethods: AllowedMethods.ALLOW_ALL,
@@ -241,26 +243,47 @@ export class StackMain extends Stack {
           },
         ],
       },
+      // defaultBehavior: {
+      //   origin:
+      //     origins.S3BucketOrigin.withOriginAccessControl(staticAssetsBucket),
+      //   viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      //   cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+      // },
       logIncludesCookies: true,
       priceClass: PriceClass.PRICE_CLASS_100, // Use Price Class 100 for lower cost
       additionalBehaviors: {
-        "/api/*": {
-          origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          allowedMethods: AllowedMethods.ALLOW_ALL,
-          originRequestPolicy: managedOriginRequestPolicy,
-          responseHeadersPolicy,
-          edgeLambdas: [
-            {
-              functionVersion: authFunction.currentVersion,
-              // Revert to ORIGIN_REQUEST so origin.custom.domainName is available (Function URL host)
-              eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
-              includeBody: true,
-            },
-          ],
-        },
+        // "/api/*": {
+        //   origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
+        //   viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        //   cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        //   allowedMethods: AllowedMethods.ALLOW_ALL,
+        //   originRequestPolicy: managedOriginRequestPolicy,
+        //   responseHeadersPolicy,
+        //   edgeLambdas: [
+        //     {
+        //       functionVersion: authFunction.currentVersion,
+        //       // Revert to ORIGIN_REQUEST so origin.custom.domainName is available (Function URL host)
+        //       eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
+        //       includeBody: true,
+        //     },
+        //   ],
+        // },
+        // "/_serverFn/*": {
+        //   origin: new origins.FunctionUrlOrigin(serverFunctionUrl),
+        //   viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        //   cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        //   allowedMethods: AllowedMethods.ALLOW_ALL,
+        //   originRequestPolicy: managedOriginRequestPolicy,
+        //   responseHeadersPolicy,
+        //   edgeLambdas: [
+        //     {
+        //       functionVersion: authFunction.currentVersion,
+        //       // Revert to ORIGIN_REQUEST so origin.custom.domainName is available (Function URL host)
+        //       eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
+        //       includeBody: true,
+        //     },
+        //   ],
+        // },
         "/_build/*": {
           origin:
             origins.S3BucketOrigin.withOriginAccessControl(staticAssetsBucket),
@@ -302,11 +325,13 @@ export class StackMain extends Stack {
           httpStatus: 403,
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
+          // responsePagePath: "/index.mjs",
         },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
+          // responsePagePath: "/index.mjs",
         },
       ],
     });
